@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymHub | Member Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --glass-white: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #0d6efd;
+            --accent-purple: #6f42c1;
+            --accent-success: #198754;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Cards */
+        .dashboard-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card p {
+            letter-spacing: 1px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-soft {
+            background: rgba(13, 110, 253, 0.15);
+            color: #8ab4ff;
+            border: 1px solid rgba(13, 110, 253, 0.25);
+        }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* List Items */
+        .list-group-item {
+            background: transparent;
+            border-color: var(--glass-border);
+            color: white;
+            padding: 1rem 0;
+        }
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Modal */
+        .modal-content {
+            background: rgba(30, 30, 47, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            color: white;
+        }
+        .modal-header { border-bottom-color: var(--glass-border); }
+        .modal-footer { border-top-color: var(--glass-border); }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 10px;
+        }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-color: var(--accent-blue);
+            box-shadow: none;
+        }
+        option { background-color: #2d2d44; color: white; }
+
+        /* Profile & Buttons */
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-right: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-outline-primary {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .btn-outline-primary:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        .btn-primary-soft {
+             background: rgba(13, 110, 253, 0.15);
+             color: var(--accent-blue);
+        }
+        .btn-primary-soft:hover {
+             background: var(--accent-blue);
+             color: white;
+        }
+
+        .chart-container-height { height: 250px; }
+        .cursor-pointer { cursor: pointer; }
+        
+        .bg-opacity-10 { --bs-bg-opacity: 0.1; }
+        .text-white-50 { color: rgba(255,255,255,0.5) !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-dumbbell me-2 text-primary"></i>GymHub
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2"><a class="nav-link active" href="{{ url_for('member_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item me-2"><a class="nav-link" href="{{ url_for('workout_plan') }}">Workout Plan</a></li>
+                    <li class="nav-item me-3"><a class="nav-link" href="{{ url_for('schedule') }}">Class Schedule</a></li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <!-- Header Section -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5">
+            <div class="d-flex align-items-center mb-3 mb-md-0">
+                <div class="profile-avatar">
+                    {{ member.first_name[0] }}{{ member.last_name[0] }}
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1">Welcome, {{ member.first_name }}!</h2>
+                    <p class="text-white-50 mb-0">Member since {{ member.join_date }}</p>
+                </div>
+            </div>
+            <div>
+                <a href="{{ url_for('schedule') }}" class="btn btn-success rounded-pill px-3 me-2">
+                    <i class="fas fa-calendar-plus me-1"></i> Book Activity
+                </a>
+                <button class="btn btn-outline-light rounded-pill px-3 me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-cog me-1"></i> Settings
+                </button>
+                <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#planModal">
+                    <i class="fas fa-crown me-1"></i> {{ member.plan_name }} Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-calendar-check me-2 text-primary"></i>This Month</p>
+                    <h2 class="fw-bold mb-1">{{ stats.bookings or 0 }}</h2>
+                    <small class="text-white-50">Sessions Completed</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-chart-line me-2 text-success"></i>Reports</p>
+                    <h2 class="fw-bold mb-1">{{ stats.reports or 0 }}</h2>
+                    <small class="text-white-50">Trainer assessments</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-user-friends me-2 text-warning"></i>Trainer</p>
+                    {% if member.trainer_id %}
+                        <h5 class="fw-bold mb-1 text-truncate">{{ member.trainer_first_name }}</h5>
+                        <small class="text-white-50 btn-link cursor-pointer" data-bs-toggle="modal" data-bs-target="#trainerModal">Change Trainer</small>
+                    {% else %}
+                        <h5 class="fw-bold mb-1 text-muted">None</h5>
+                        <small class="text-primary cursor-pointer" data-bs-toggle="modal" data-bs-target="#trainerModal">Select Trainer</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-wallet me-2 text-danger"></i>Status</p>
+                    <div class="d-flex align-items-center">
+                        <h5 class="fw-bold mb-0 me-2">{{ member.status }}</h5>
+                        <span class="badge bg-success rounded-circle p-1" style="width: 10px; height: 10px;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW: My Workout Plan Bookings Section (Table View) -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-8">
+                <div class="dashboard-card shadow h-100 p-0 overflow-hidden">
+                    <div class="p-4 d-flex justify-content-between align-items-center border-bottom border-secondary border-opacity-25">
+                        <h5 class="fw-bold mb-0"><i class="fas fa-calendar-alt me-2 text-primary"></i>My Workout Plan Bookings</h5>
+                        <a href="{{ url_for('workout_plan') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                            <i class="fas fa-edit me-1"></i>Manage Plan
+                        </a>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="background-color: #ffffff; color: #000000; border-radius: 12px; overflow: hidden;">
+                            <thead class="bg-light text-uppercase small text-dark border-bottom border-dark">
+                                <tr>
+                                    <th class="ps-4 py-3" style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">Day</th>
+                                    <th class="py-3" style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">Workout Focus</th>
+                                    <th class="text-end pe-4 py-3" style="font-weight: 800; letter-spacing: 0.5px; font-size: 0.9rem;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for day in streak %}
+                                <tr class="{{ 'table-primary' if day.is_today else '' }}" style="border-bottom: 1px solid #dee2e6;">
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" 
+                                                 style="width: 48px; height: 48px; background: {{ '#0d6efd' if day.is_today else '#e9ecef' }}; color: {{ '#fff' if day.is_today else '#000' }};">
+                                                <i class="fas {{ day.icon }} fa-lg"></i>
+                                            </div>
+                                            <div>
+                                                <span class="d-block fw-bold fs-5 text-dark">{{ day.day }}</span>
+                                                {% if day.is_today %}
+                                                <span class="badge bg-primary text-white mt-1 shadow-sm" style="font-size: 0.7rem;">TODAY</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="fw-bold fs-6 text-dark">{{ day.plan }}</span>
+                                    </td>
+                                    <td class="text-end pe-4 py-3">
+                                        {% if day.status == 'active' %}
+                                            <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm">
+                                                <i class="fas fa-check me-1"></i>Booked
+                                            </span>
+                                        {% elif day.status == 'today' %}
+                                            <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm">
+                                                <i class="fas fa-clock me-1"></i>Pending
+                                            </span>
+                                        {% elif day.status == 'missed' %}
+                                            <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm">Missed</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary rounded-pill px-3 py-2 fs-6 shadow-sm">Planned</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="dashboard-card">
+                    <h5 class="fw-bold mb-3"><i class="fas fa-play me-2 text-primary"></i>Workout Videos</h5>
+                    <div class="ratio ratio-16x9 mb-3">
+                        <iframe id="videoPlayer" src="https://www.youtube.com/embed/exXly1KGEgM?rel=0" title="Workout Video" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="list-group list-group-flush custom-scrollbar" style="max-height: 200px; overflow-y: auto;">
+                        <button onclick="changeVideo('exXly1KGEgM')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white ps-2 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle fa-lg me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-0">Featured Workout</h6>
+                                    <small class="text-white-50">Training Session</small>
+                                </div>
+                            </div>
+                        </button>
+                        <button onclick="changeVideo('xqVBoyKXbsA')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white ps-2 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle fa-lg me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-0">Video Session 1</h6>
+                                    <small class="text-white-50">Workout Routine</small>
+                                </div>
+                            </div>
+                        </button>
+                        <button onclick="changeVideo('Z-6erGcT-qw')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white ps-2 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle fa-lg me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-0">Video Session 2</h6>
+                                    <small class="text-white-50">Workout Routine</small>
+                                </div>
+                            </div>
+                        </button>
+                        <button onclick="changeVideo('4-yQlqkKP_E')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white ps-2 border-bottom border-secondary border-opacity-25">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle fa-lg me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-0">Video Session 3</h6>
+                                    <small class="text-white-50">Workout Routine</small>
+                                </div>
+                            </div>
+                        </button>
+                        <button onclick="changeVideo('n3gTHy6WR9U')" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white ps-2">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-play-circle fa-lg me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-0">Video Session 4</h6>
+                                    <small class="text-white-50">Workout Routine</small>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <script>
+                        function changeVideo(videoId) {
+                            document.getElementById('videoPlayer').src = 'https://www.youtube.com/embed/' + videoId + '?rel=0&autoplay=1';
+                        }
+                    </script>
+                    
+                    <hr class="border-secondary my-4">
+                    
+                    <h5 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i>Daily Tips</h5>
+                    <div class="custom-scrollbar pe-2" style="max-height: 300px; overflow-y: auto;">
+                        <div class="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-apple-alt text-success me-2"></i>
+                                <small class="text-success fw-bold">Nutrition</small>
+                            </div>
+                            <p class="mb-0 small">"Stay hydrated! Drinking water before meals can help you feel fuller and aid in weight management."</p>
+                        </div>
+
+                        <div class="p-3 bg-primary bg-opacity-10 rounded-3 border border-primary border-opacity-25 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-dumbbell text-primary me-2"></i>
+                                <small class="text-primary fw-bold">Workout</small>
+                            </div>
+                            <p class="mb-0 small">"Focus on form over weight. Proper technique prevents injury and maximizes long-term results."</p>
+                        </div>
+
+                        <div class="p-3 bg-info bg-opacity-10 rounded-3 border border-info border-opacity-25 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-bed text-info me-2"></i>
+                                <small class="text-info fw-bold">Recovery</small>
+                            </div>
+                            <p class="mb-0 small">"Muscles grow while you rest. Aim for 7-9 hours of quality sleep to support your gains."</p>
+                        </div>
+
+                        <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-fire text-warning me-2"></i>
+                                <small class="text-warning fw-bold">Motivation</small>
+                            </div>
+                            <p class="mb-0 small">"The only bad workout is the one that didn't happen. Consistency is the key to success!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Engagement Section -->
+
+        <!-- Main Content Area: Charts & Schedule (7/5 Split like Trainer) -->
+        <div class="row g-4 mb-5">
+            
+            <!-- Left: Activity Monitor -->
+            <div class="col-lg-7">
+                <div class="dashboard-card shadow h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar me-2 text-warning"></i>Activity Monitor</h5>
+                        <span class="badge badge-soft rounded-pill px-3">Weekly Trends</span>
+                    </div>
+                    <div class="chart-container-height position-relative">
+                        <canvas id="weeklyActivityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Upcoming Schedule -->
+            <div class="col-lg-5">
+                <div class="dashboard-card shadow h-100 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0"><i class="far fa-calendar-alt me-2 text-info"></i>My Schedule</h5>
+                        <a href="{{ url_for('schedule') }}" class="btn btn-sm btn-primary rounded-pill px-4">
+                            <i class="fas fa-plus me-1"></i> Book Class
+                        </a>
+                    </div>
+                    
+                    <div class="list-group flex-grow-1 custom-scrollbar" style="max-height: 450px; overflow-y: auto;">
+                        {% if schedule %}
+                            {% for item in schedule %}
+                            <div class="list-group-item d-flex align-items-center">
+                                <div class="text-center me-3 p-2 rounded bg-opacity-10 {{ 'bg-warning text-warning' if item.type == 'Training' else 'bg-primary text-primary' }}" style="min-width: 60px;">
+                                    <h5 class="mb-0 fw-bold">{{ item.day[:3] }}</h5>
+                                    <small class="fw-bold" style="font-size: 0.7rem;">{{ item.time }}</small>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold text-white" style="font-size: 1.1rem;">{{ item.title }}</h6>
+                                    <div class="small text-white">
+                                        <i class="fas fa-user-circle me-1"></i> {{ item.instructor }}
+                                        {% if item.type == 'Training' %}
+                                            <span class="badge bg-warning text-dark ms-2" style="font-size: 0.65rem;">PT Session</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5 text-white-50">
+                                <i class="far fa-calendar-times fa-3x mb-3 opacity-50"></i>
+                                <p>No upcoming sessions.</p>
+                                <a href="{{ url_for('schedule') }}" class="btn btn-sm btn-outline-light">Book a Class</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Reports / Details -->
+        <div class="row g-4 mb-4">
+             <div class="col-lg-8">
+                 <div class="dashboard-card shadow">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0"><i class="fas fa-clipboard-list me-2 text-success"></i>Performance Reports</h5>
+                    </div>
+                    {% if reports %}
+                        <div class="row g-3">
+                        {% for report in reports %}
+                            <div class="col-md-6">
+                                <div class="p-3 rounded" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="badge bg-success">{{ report.performance }}</span>
+                                        <small class="text-white-50">{{ report.created_at }}</small>
+                                    </div>
+                                    <h6 class="small text-white-50 mb-1">Progress: <span class="text-white">{{ report.progress }}%</span></h6>
+                                    <div class="progress mb-2" style="height: 5px; background: rgba(255,255,255,0.1);">
+                                        <div class="progress-bar bg-success" style="width: {{ report.progress }}%"></div>
+                                    </div>
+                                    {% if report.notes %}
+                                        <p class="small text-white-50 mb-0 fst-italic">"{{ report.notes }}"</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-white-50 text-center py-3">No trainer reports filed yet.</p>
+                    {% endif %}
+                 </div>
+             </div>
+             
+             <div class="col-lg-4">
+                 <div class="dashboard-card shadow h-100">
+                     <h5 class="mb-4"><i class="fas fa-info-circle me-2 text-secondary"></i>My Details</h5>
+                     <div class="bg-dark bg-opacity-25 rounded p-3 mb-2 border border-secondary border-opacity-25">
+                         <small class="text-white-50 d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Email</small>
+                         <span>{{ member.email }}</span>
+                     </div>
+                     <div class="bg-dark bg-opacity-25 rounded p-3 mb-2 border border-secondary border-opacity-25">
+                         <small class="text-white-50 d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Phone</small>
+                         <span>{{ member.phone or 'N/A' }}</span>
+                     </div>
+                     <div class="row g-2">
+                         <div class="col-6">
+                            <div class="bg-dark bg-opacity-25 rounded p-3 border border-secondary border-opacity-25 h-100">
+                                <small class="text-white-50 d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Gender</small>
+                                <span>{{ member.gender or '-' }}</span>
+                            </div>
+                         </div>
+                         <div class="col-6">
+                             <div class="bg-dark bg-opacity-25 rounded p-3 border border-secondary border-opacity-25 h-100">
+                                <small class="text-white-50 d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Plan Cost</small>
+                                <span>${{ member.plan_price }}</span>
+                            </div>
+                         </div>
+                     </div>
+                     <div class="mt-3">
+                        <small class="text-white-50 d-block text-uppercase fw-bold mb-2">Class Distribution</small>
+                         <div style="height: 150px;">
+                             <canvas id="classDistributionChart"></canvas>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+        </div>
+
+        <footer class="text-center text-white-50 small mt-5 pb-5">
+            <p>&copy; 2026 GymHub. All rights reserved.</p>
+        </footer>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dark Mode Chart Configuration
+            Chart.defaults.color = 'rgba(255, 255, 255, 0.7)';
+            Chart.defaults.borderColor = 'rgba(255, 255, 255, 0.1)';
+
+            const activityData = {{ analytics.daily_activity | tojson }};
+            const classData = {{ analytics.class_distribution | tojson }};
+            
+            // 1. Weekly Activity Chart
+            const ctxActivity = document.getElementById('weeklyActivityChart');
+            if(ctxActivity) {
+                const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const activityCounts = daysOrder.map(day => activityData[day] || 0);
+                const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+                new Chart(ctxActivity, {
+                    type: 'bar',
+                    data: {
+                        labels: dayLabels,
+                        datasets: [{
+                            label: 'Sessions',
+                            data: activityCounts,
+                            backgroundColor: '#ffd166',
+                            borderRadius: 4,
+                            barThickness: 20
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' } },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+            
+            // 2. Class Distribution (Doughnut)
+            const ctxClass = document.getElementById('classDistributionChart');
+            if(ctxClass && Object.keys(classData).length > 0) {
+                new Chart(ctxClass, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(classData),
+                        datasets: [{
+                            data: Object.values(classData),
+                            backgroundColor: ['#4361ee', '#3f37c9', '#4cc9f0', '#f72585', '#7209b7'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { boxWidth: 10, usePointStyle: true, color: 'rgba(255,255,255,0.7)' } }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- Modals -->
+    
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Profile</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/member/update-profile">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ member.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ member.last_name }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email <small class="text-white-50">(Cannot be changed)</small></label>
+                            <input type="email" class="form-control" value="{{ member.email }}" readonly disabled style="opacity: 0.6;">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ member.phone or '' }}">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" name="date_of_birth" value="{{ member.date_of_birth or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" name="gender">
+                                    <option value="">Select...</option>
+                                    <option value="Male" {% if member.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if member.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if member.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan Modal -->
+    <div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Change Membership Plan</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/member/update-plan">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            {% for plan in plans %}
+                            <div class="col-md-6">
+                                <label class="card h-100 border p-3 cursor-pointer" style="background: rgba(255,255,255,0.05); border-color: var(--glass-border) !important; color: white;">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ plan.plan_name }}</h6>
+                                            <h4 class="text-primary mb-0">${{ plan.price }}</h4>
+                                        </div>
+                                        <input type="radio" name="plan_id" value="{{ plan.plan_id }}" class="form-check-input" {% if member.plan_id == plan.plan_id %}checked{% endif %}>
+                                    </div>
+                                    <p class="small text-white-50 mt-2 mb-0">{{ plan.duration_months }} Month(s) Access</p>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trainer Modal -->
+    <div class="modal fade" id="trainerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Personal Trainer</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/member/select-trainer" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            {% for t in trainers %}
+                            <div class="col-md-6">
+                                <label class="card h-100 border p-3 flex-row align-items-center" style="background: rgba(255,255,255,0.05); border-color: var(--glass-border) !important; color: white;">
+                                    <input type="radio" name="trainer_id" value="{{ t.trainer_id }}" class="form-check-input me-3" {% if member.trainer_id == t.trainer_id %}checked{% endif %}>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ t.first_name }} {{ t.last_name }}</h6>
+                                        <small class="text-white-50">{{ t.specialization }}</small>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

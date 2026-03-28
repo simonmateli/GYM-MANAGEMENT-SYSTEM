@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard | GymHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --glass-white: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #0d6efd;
+            --accent-purple: #6f42c1;
+            --accent-success: #198754;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Cards */
+        .dashboard-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .stats-card p {
+            letter-spacing: 1px;
+            font-size: 0.75rem;
+        }
+        
+        .badge-soft {
+            background: rgba(13, 110, 253, 0.15);
+            color: #8ab4ff;
+            border: 1px solid rgba(13, 110, 253, 0.25);
+        }
+
+        /* Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* List Items */
+        .list-group-item {
+            background: transparent;
+            border-color: var(--glass-border);
+            color: white;
+            padding: 1rem 0;
+        }
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Modal */
+        .modal-content {
+            background: rgba(30, 30, 47, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 25px;
+            color: white;
+        }
+        .modal-header { border-bottom-color: var(--glass-border); }
+        .modal-footer { border-top-color: var(--glass-border); }
+        
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--glass-border);
+            color: white;
+            border-radius: 10px;
+        }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.5); }
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-color: var(--accent-blue);
+            box-shadow: none;
+        }
+        option { background-color: #2d2d44; color: white; }
+
+        /* Profile & Status */
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-right: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-outline-primary {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .btn-outline-primary:hover {
+            background: var(--accent-blue);
+            color: white;
+        }
+        
+        .btn-primary-soft {
+             background: rgba(13, 110, 253, 0.15);
+             color: var(--accent-blue);
+        }
+        .btn-primary-soft:hover {
+             background: var(--accent-blue);
+             color: white;
+        }
+
+        .chart-container-height { height: 250px; }
+        
+        .cursor-pointer { cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-dumbbell me-2 text-primary"></i>GymHub
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2"><a class="nav-link active" href="{{ url_for('member_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item me-3"><a class="nav-link" href="{{ url_for('schedule') }}">Class Schedule</a></li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <!-- Header Section -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5">
+            <div class="d-flex align-items-center mb-3 mb-md-0">
+                <div class="profile-avatar">
+                    {{ member.first_name[0] }}{{ member.last_name[0] }}
+                </div>
+                <div>
+                    <h2 class="fw-bold mb-1">Welcome, {{ member.first_name }}!</h2>
+                    <p class="text-white-50 mb-0">Member since {{ member.join_date }}</p>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn-outline-light rounded-pill px-3 me-2" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="fas fa-cog me-1"></i> Settings
+                </button>
+                <button class="btn btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#planModal">
+                    <i class="fas fa-crown me-1"></i> {{ member.plan_name }} Plan
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-calendar-check me-2 text-primary"></i>This Month</p>
+                    <h2 class="fw-bold mb-1">{{ stats.bookings or 0 }}</h2>
+                    <small class="text-white-50">Sessions Completed</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-chart-line me-2 text-success"></i>Reports</p>
+                    <h2 class="fw-bold mb-1">{{ stats.reports or 0 }}</h2>
+                    <small class="text-white-50">Trainer assessments</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-user-friends me-2 text-warning"></i>Trainer</p>
+                    {% if member.trainer_id %}
+                        <h5 class="fw-bold mb-1 text-truncate">{{ member.trainer_first_name }}</h5>
+                        <small class="text-white-50 btn-link cursor-pointer" data-bs-toggle="modal" data-bs-target="#trainerModal">Change Trainer</small>
+                    {% else %}
+                        <h5 class="fw-bold mb-1 text-muted">None</h5>
+                        <small class="text-primary cursor-pointer" data-bs-toggle="modal" data-bs-target="#trainerModal">Select Trainer</small>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dashboard-card stats-card shadow h-100">
+                    <p class="text-uppercase text-white-50 small mb-2"><i class="fas fa-wallet me-2 text-danger"></i>Status</p>
+                    <div class="d-flex align-items-center">
+                        <h5 class="fw-bold mb-0 me-2">{{ member.status }}</h5>
+                        <span class="badge bg-success rounded-circle p-1" style="width: 10px; height: 10px;"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            
+            <!-- Left Column: Main Content -->
+            <div class="col-lg-8">
+                
+                <!-- Schedule Section -->
+                <div class="dashboard-card mb-4">
+                    <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold"><i class="far fa-calendar-alt me-2 text-primary"></i>My Schedule</h5>
+                        <a href="{{ url_for('schedule') }}" class="btn btn-sm btn-primary-soft rounded-pill">
+                            <i class="fas fa-plus me-1"></i>Book Class
+                        </a>
+                    </div>
+                    <div class="card-body p-0">
+                        {% if schedule %}
+                            <div class="scrollable-section">
+                                {% for item in schedule %}
+                                <div class="schedule-item align-items-center">
+                                    <div class="date-box">
+                                        <div class="date-day">{{ item.day[:3] }}</div>
+                                        <div class="date-time">{{ item.time }}</div>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1 fw-bold text-dark">
+                                            {{ item.title }}
+                                            {% if item.type == 'Training' %}
+                                                <span class="badge bg-warning text-dark ms-2" style="font-size: 0.7rem;">1-on-1</span>
+                                            {% else %}
+                                                <span class="badge bg-primary bg-opacity-10 text-primary ms-2" style="font-size: 0.7rem;">Class</span>
+                                            {% endif %}
+                                        </h6>
+                                        <div class="small text-muted">
+                                            <i class="fas fa-user-circle me-1"></i> {{ item.instructor }}
+                                            <span class="mx-2">•</span>
+                                            {% if item.location %}
+                                            <i class="fas fa-map-marker-alt me-1"></i> {{ item.location }}
+                                            {% endif %}
+                                        </div>
+                                        {% if item.notes %}
+                                        <div class="mt-2 small text-muted bg-light p-2 rounded fst-italic border-start border-warning">
+                                            "{{ item.notes }}"
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% if item.date %}
+                                    <div class="text-end d-none d-md-block">
+                                        <small class="text-muted">{{ item.date }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <div class="mb-3 text-muted opacity-25">
+                                    <i class="far fa-calendar-plus fa-4x"></i>
+                                </div>
+                                <h6 class="text-muted">No sessions scheduled</h6>
+                                <p class="small text-muted mb-3">Book a class or ask your trainer to schedule a session.</p>
+                                <a href="{{ url_for('schedule') }}" class="btn btn-primary btn-sm rounded-pill px-4">Browse Schedule</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Coach Reports Section -->
+                {% if reports %}
+                <div class="dashboard-card mb-4 border-0">
+                    <div class="p-4 border-bottom">
+                        <h5 class="mb-0 fw-bold header-text text-success"><i class="fas fa-clipboard-check me-2"></i>Coach Performance Reports</h5>
+                    </div>
+                    <div class="p-3">
+                        <div class="scrollable-section">
+                        {% for report in reports %}
+                        <div class="report-item">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0 fw-bold text-dark">{{ report.performance }}</h6>
+                                <span class="badge bg-white text-dark border shadow-sm">{{ report.created_at }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between small mb-1">
+                                    <span class="fw-bold">Progress Assessment</span>
+                                    <span class="text-success fw-bold">{{ report.progress }}%</span>
+                                </div>
+                                <div class="progress progress-slim">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ report.progress }}%" aria-valuenow="{{ report.progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            
+                            {% if report.notes %}
+                            <p class="small text-muted mb-0 fst-italic">
+                                <i class="fas fa-quote-left me-2 opacity-25\"></i>{{ report.notes }}
+                            </p>
+                            {% endif %}
+                            <div class="mt-2 text-end">
+                                <small class="text-secondary fw-bold" style="font-size: 0.75rem;">— Posted by {{ report.trainer_name }}</small>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Analytics Graphs -->
+                 <div class="dashboard-card p-4">
+                    <h5 class="fw-bold mb-4">Activity Overview</h5>
+                    <div class="row">
+                        <div class="col-md-7">
+                            <h6 class="small text-uppercase text-muted fw-bold mb-3">Weekly Check-ins</h6>
+                            <div style="height: 250px;">
+                                <canvas id="weeklyActivityChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-5 mt-4 mt-md-0">
+                            <h6 class="small text-uppercase text-muted fw-bold mb-3">Top Classes</h6>
+                            <div style="height: 250px;">
+                                <canvas id="classDistributionChart"></canvas>
+                            </div>
+                             {% if not analytics.class_distribution %}
+                                <div class="text-center small text-muted mt-2">No class data yet</div>
+                             {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Sidebar -->
+            <div class="col-lg-4">
+                
+                <!-- Profile Summary -->
+                <div class="dashboard-card p-4 mb-4 text-center position-relative">
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <button class="btn btn-sm btn-link text-muted" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            <i class="fas fa-cog"></i>
+                        </button>
+                    </div>
+                    <div class="profile-avatar">
+                        {{ member.first_name[0] }}{{ member.last_name[0] }}
+                    </div>
+                    <h5 class="fw-bold mb-1">{{ member.first_name }} {{ member.last_name }}</h5>
+                    <p class="text-muted small mb-3">{{ member.email }}</p>
+                    
+                    <div class="row g-2 text-start">
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 h-100">
+                                <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Phone</small>
+                                <span class="small fw-bold">{{ member.phone or 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 h-100">
+                                <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Gender</small>
+                                <span class="small fw-bold">{{ member.gender or 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 h-100">
+                                <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Born</small>
+                                <span class="small fw-bold">{{ member.date_of_birth or 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="bg-light rounded p-2 h-100">
+                                <small class="text-muted d-block text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Location</small>
+                                <span class="small fw-bold">Main Branch</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Membership Plan -->
+                <div class="dashboard-card mb-4 overflow-hidden">
+                    <div class="p-4 bg-primary text-white position-relative">
+                        <h6 class="text-white-50 text-uppercase small fw-bold mb-1">Current Membership</h6>
+                        <h3 class="mb-0 fw-bold">{{ member.plan_name }}</h3>
+                        <div class="position-absolute top-0 end-0 m-3 opacity-25">
+                            <i class="fas fa-id-card fa-3x"></i>
+                        </div>
+                    </div>
+                    <div class="p-3">
+                        <div class="d-flex justify-content-between align-items-end mb-3">
+                            <div>
+                                <h2 class="text-dark mb-0 fw-bold">${{ member.plan_price }}</h2>
+                                <small class="text-muted\">/ {{ member.duration_months }} Month(s)</small>
+                            </div>
+                            <span class="badge bg-success bg-opacity-10 text-success">Active</span>
+                        </div>
+                        <button class="btn btn-outline-primary w-100 btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#planModal">
+                            Change Plan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Trainer Contact -->
+                <div class="dashboard-card p-4 mb-4">
+                    <h6 class="fw-bold mb-3">Personal Trainer</h6>
+                    {% if member.trainer_id %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-light text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">{{ member.trainer_first_name }} {{ member.trainer_last_name }}</h6>
+                                <small class="text-muted">{{ member.trainer_specialization }}</small>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a href="mailto:{{ member.trainer_email }}" class="btn btn-primary-soft btn-sm">
+                                <i class="fas fa-envelope me-2"></i>Email Coach
+                            </a>
+                            <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#trainerModal">
+                                Switch Trainer
+                            </button>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <p class="small text-muted mb-3">Get personalized workouts and guidance.</p>
+                            <button class="btn btn-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#trainerModal">
+                                Find a Trainer
+                            </button>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="text-center text-muted small mt-4 pb-2">
+            <p>&copy; 2026 GymHub. All rights reserved.</p>
+        </footer>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Data from Flask
+            const activityData = {{ analytics.daily_activity | tojson }};
+            const classData = {{ analytics.class_distribution | tojson }};
+            
+            // 1. Weekly Activity Chart
+            const ctxActivity = document.getElementById('weeklyActivityChart');
+            if(ctxActivity) {
+                const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                const activityCounts = daysOrder.map(day => activityData[day] || 0);
+
+                // Use simple labels for mobile capability
+                const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+                new Chart(ctxActivity, {
+                    type: 'bar',
+                    data: {
+                        labels: dayLabels,
+                        datasets: [{
+                            label: 'Sessions',
+                            data: activityCounts,
+                            backgroundColor: '#4361ee',
+                            borderRadius: 4,
+                            barThickness: 12
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { display: false, beginAtZero: true },
+                            x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+                        }
+                    }
+                });
+            }
+            
+            // 2. Class Distribution (Doughnut)
+            const ctxClass = document.getElementById('classDistributionChart');
+            if(ctxClass && Object.keys(classData).length > 0) {
+                new Chart(ctxClass, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(classData),
+                        datasets: [{
+                            data: Object.values(classData),
+                            backgroundColor: ['#4361ee', '#3f37c9', '#4cc9f0', '#f72585', '#7209b7'],
+                            borderWidth: 0,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: {
+                            legend: { position: 'right', labels: { boxWidth: 8, usePointStyle: true, font: { size: 10 } } }
+                        }
+                    }
+                });
+            } else if (ctxClass) {
+                // Handle empty state visually if needed
+            }
+        });
+    </script>
+    
+    <!-- Modals (Preserved functionality) -->
+    
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/member/update-profile">
+                    <div class="modal-body">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="{{ member.first_name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="{{ member.last_name }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email <small class="text-muted">(Cannot be changed)</small></label>
+                            <input type="email" class="form-control" value="{{ member.email }}" readonly disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" name="phone" value="{{ member.phone or '' }}">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" class="form-control" name="date_of_birth" value="{{ member.date_of_birth or '' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Gender</label>
+                                <select class="form-select" name="gender">
+                                    <option value="">Select...</option>
+                                    <option value="Male" {% if member.gender == 'Male' %}selected{% endif %}>Male</option>
+                                    <option value="Female" {% if member.gender == 'Female' %}selected{% endif %}>Female</option>
+                                    <option value="Other" {% if member.gender == 'Other' %}selected{% endif %}>Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Plan Modal -->
+    <div class="modal fade" id="planModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Change Membership Plan</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST" action="/member/update-plan">
+                    <div class="modal-body bg-light">
+                        <div class="row g-3">
+                            {% for plan in plans %}
+                            <div class="col-md-6">
+                                <label class="card h-100 border-0 shadow-sm p-3 cursor-pointer">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ plan.plan_name }}</h6>
+                                            <h4 class="text-primary mb-0">${{ plan.price }}</h4>
+                                        </div>
+                                        <input type="radio" name="plan_id" value="{{ plan.plan_id }}" class="form-check-input" {% if member.plan_id == plan.plan_id %}checked{% endif %}>
+                                    </div>
+                                    <p class="small text-muted mt-2 mb-0">{{ plan.duration_months }} Month(s) Access</p>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Plan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trainer Modal -->
+    <div class="modal fade" id="trainerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Select Personal Trainer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/member/select-trainer" method="POST">
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            {% for t in trainers %}
+                            <div class="col-md-6">
+                                <label class="card h-100 border p-3 flex-row align-items-center">
+                                    <input type="radio" name="trainer_id" value="{{ t.trainer_id }}" class="form-check-input me-3" {% if member.trainer_id == t.trainer_id %}checked{% endif %}>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold">{{ t.first_name }} {{ t.last_name }}</h6>
+                                        <small class="text-muted">{{ t.specialization }}</small>
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

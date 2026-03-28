@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymHub Admin | Payments</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --sidebar-width: 250px; --primary: #3498db; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #ecf0f1; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { width: var(--sidebar-width); height: 100vh; position: fixed; background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: white; transition: all 0.3s; top: 0; left: 0; overflow-y: auto; }
+        .main-content { margin-left: var(--sidebar-width); padding: 40px; min-height: 100vh; }
+        .sidebar-link { padding: 15px 25px; display: block; color: #bdc3c7; text-decoration: none; transition: 0.3s; border-left: 4px solid transparent; }
+        .sidebar-link:hover { background: rgba(52, 152, 219, 0.1); color: var(--primary); border-left-color: var(--primary); }
+        .sidebar-link.active { background: rgba(52, 152, 219, 0.15); color: var(--primary); border-left-color: var(--primary); }
+        .card-stats { border: none; border-radius: 12px; transition: all 0.3s; background: white; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .table-container { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .header-section { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .sidebar .sidebar-header { padding: 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .sidebar .sidebar-header h4 { margin: 0; font-size: 20px; font-weight: 700; }
+        .badge-custom { padding: 6px 12px; border-radius: 6px; font-weight: 500; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="sidebar shadow">
+    <div class="sidebar-header">
+        <h4 class="fw-bold"><i class="fas fa-dumbbell me-2"></i>GymHub Admin</h4>
+        <small class="text-muted d-block mt-1">Management System</small>
+    </div>
+    <nav class="mt-4">
+        <a href="/admin" class="sidebar-link"><i class="fas fa-users me-3"></i>Members</a>
+        <a href="/trainers" class="sidebar-link"><i class="fas fa-user-tie me-3"></i>Trainers</a>
+        <a href="/payments" class="sidebar-link active"><i class="fas fa-credit-card me-3"></i>Payments</a>
+        <a href="/analytics" class="sidebar-link"><i class="fas fa-chart-line me-3"></i>Analytics</a>
+        <hr class="bg-white bg-opacity-10">
+        <a href="/settings" class="sidebar-link"><i class="fas fa-cogs me-3"></i>System Config</a>
+        <a href="/logout" class="sidebar-link text-danger"><i class="fas fa-sign-out-alt me-3"></i>Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div class="header-section">
+        <h1 class="header-title">Subscription & Payments</h1>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card card-stats p-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-primary bg-opacity-10 text-primary p-3 rounded me-3">
+                        <i class="fas fa-dollar-sign fa-lg"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted">Total Active Subs</small>
+                        <h4 class="mb-0 fw-bold">{{ members|selectattr("status", "equalto", "Active")|list|length }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-stats p-3">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-10 text-success p-3 rounded me-3">
+                        <i class="fas fa-wallet fa-lg"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted">Estimated Revenue</small>
+                        <h4 class="mb-0 fw-bold">$
+                            {% set ns = namespace(total=0) %}
+                            {% for m in members %}
+                                {% if m.status == 'Active' %}
+                                    {% set ns.total = ns.total + (m.plan_price or 0) %}
+                                {% endif %}
+                            {% endfor %}
+                            {{ ns.total }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4">Member</th>
+                        <th>Current Package</th>
+                        <th>Price</th>
+                        <th>Billed On</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold">{{ member.first_name }} {{ member.last_name }}</div>
+                            <small class="text-muted">{{ member.email }}</small>
+                        </td>
+                        <td>
+                            <span class="badge badge-custom bg-info bg-opacity-10 text-info border border-info-subtle">
+                                <i class="fas fa-box-open me-2"></i>{{ member.plan_name or 'Standard Monthly' }}
+                            </span>
+                        </td>
+                        <td class="fw-bold text-dark">
+                            ${{ member.plan_price or '0.00' }}
+                        </td>
+                        <td>
+                            <i class="fas fa-calendar-check text-muted me-2"></i>{{ member.join_date }}
+                        </td>
+                        <td>
+                            {% if member.status == 'Active' %}
+                            <span class="badge badge-custom bg-success-subtle text-success">
+                                <i class="fas fa-check me-1"></i> Paid
+                            </span>
+                            {% else %}
+                            <span class="badge badge-custom bg-danger-subtle text-danger">
+                                <i class="fas fa-times me-1"></i> {{ member.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-secondary" title="View History"><i class="fas fa-history"></i></button>
+                            <button class="btn btn-sm btn-outline-primary" title="Edit Subscription"><i class="fas fa-pen"></i></button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">No subscriptions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymHub | Fitness Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #3498db; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; }
+        
+        /* Navbar */
+        .navbar-custom { background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%); box-shadow: 0 4px 12px rgba(0,0,0,0.15); padding: 12px 0; }
+        .navbar-custom .navbar-brand { font-size: 24px; font-weight: 700; }
+        .navbar-custom .nav-link { font-weight: 500; transition: 0.3s; }
+        .navbar-custom .nav-link:hover { color: #fff !important; opacity: 0.8; }
+        
+        /* Hero Section */
+        .hero-section { 
+            background: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=100');
+            background-size: cover;
+            background-position: center;
+            height: 90vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-title { font-size: 3.5rem; font-weight: 800; margin-bottom: 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero-subtitle { font-size: 1.3rem; margin-bottom: 30px; opacity: 0.95; }
+        .btn-hero { padding: 14px 35px; font-weight: 600; border-radius: 8px; transition: all 0.3s; font-size: 15px; }
+        .btn-hero-primary { background: var(--primary); color: white; border: none; }
+        .btn-hero-primary:hover { background: #2980b9; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); color: white; }
+        .btn-hero-secondary { background: transparent; color: white; border: 2px solid white; }
+        .btn-hero-secondary:hover { background: white; color: var(--primary); }
+        
+        /* Features Section */
+        .feature-card { border: none; border-radius: 12px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.1); height: 100%; }
+        .feature-card:hover { transform: translateY(-15px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+        .feature-icon { width: 70px; height: 70px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 20px; }
+        .feature-icon.primary { background: rgba(52, 152, 219, 0.15); color: var(--primary); }
+        .feature-icon.success { background: rgba(39, 174, 96, 0.15); color: var(--success); }
+        .feature-icon.warning { background: rgba(243, 156, 18, 0.15); color: var(--warning); }
+        .feature-title { font-weight: 700; color: #2c3e50; margin-bottom: 12px; }
+        .feature-text { color: #7f8c8d; font-size: 14px; }
+        
+        /* Stats Section */
+        .stats-section { background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%); color: white; padding: 60px 0; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: 800; }
+        .stat-label { font-size: 14px; opacity: 0.9; }
+        
+        /* Portal Cards */
+        .portal-card { border: none; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.3s; }
+        .portal-card:hover { transform: translateY(-10px); box-shadow: 0 12px 30px rgba(0,0,0,0.2); }
+        .portal-icon { font-size: 48px; margin-bottom: 15px; }
+        .portal-icon.admin { color: var(--danger); }
+        .portal-icon.trainer { color: var(--success); }
+        .portal-icon.member { color: var(--primary); }
+        .portal-title { font-weight: 700; color: #2c3e50; font-size: 20px; }
+        .portal-desc { color: #7f8c8d; font-size: 14px; }
+        .portal-btn { display: inline-block; margin-top: 15px; padding: 10px 25px; border-radius: 6px; font-weight: 600; transition: 0.3s; text-decoration: none; }
+        
+        /* About Section */
+        .about-section { padding: 60px 0; background: white; }
+        .about-title { font-size: 2.5rem; font-weight: 800; color: #2c3e50; margin-bottom: 20px; }
+        .about-text { color: #555; font-size: 15px; line-height: 1.8; }
+        
+        /* Features Grid */
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        
+        /* Footer */
+        .footer-custom { background: #2c3e50; color: white; padding: 40px 0; }
+        .footer-section h6 { font-weight: 700; margin-bottom: 15px; }
+        .footer-link { color: #bdc3c7; text-decoration: none; display: block; margin-bottom: 8px; transition: 0.3s; }
+        .footer-link:hover { color: var(--primary); }
+        .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 30px; padding-top: 20px; text-align: center; opacity: 0.8; }
+        
+        /* Section Titles */
+        .section-title { font-size: 2.2rem; font-weight: 800; color: #2c3e50; margin-bottom: 15px; }
+        .section-subtitle { color: #7f8c8d; font-size: 15px; margin-bottom: 35px; }
+        
+        /* CTA Section */
+        .cta-section { background: linear-gradient(135deg, var(--primary) 0%, #2980b9 100%); color: white; padding: 60px 0; text-align: center; }
+        .cta-title { font-size: 2rem; font-weight: 800; margin-bottom: 15px; }
+        .cta-text { font-size: 16px; opacity: 0.95; margin-bottom: 30px; }
+
+        /* Pricing Section */
+        .pricing-card { border: none; border-radius: 12px; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; transition: 0.3s; position: relative; }
+        .pricing-card:hover { transform: translateY(-10px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+        .pricing-header { padding: 30px 20px; text-align: center; color: white; }
+        .pricing-header.basic { background: var(--success); }
+        .pricing-header.standard { background: var(--primary); }
+        .pricing-header.premium { background: var(--warning); }
+        .pricing-title { font-weight: 700; font-size: 1.5rem; margin-bottom: 5px; }
+        .pricing-price { font-size: 2.5rem; font-weight: 800; }
+        .pricing-body { padding: 30px 20px; }
+        .pricing-list { list-style: none; padding: 0; margin: 0 0 20px; }
+        .pricing-list li { margin-bottom: 12px; font-size: 14px; color: #555; display: flex; align-items: center; }
+        .pricing-list li i { margin-right: 10px; color: var(--success); }
+        .pricing-btn { display: block; width: 100%; padding: 12px; border-radius: 6px; font-weight: 600; text-align: center; text-decoration: none; transition: 0.3s; border: 2px solid transparent; }
+        .pricing-btn.basic { color: var(--success); border-color: var(--success); }
+        .pricing-btn.basic:hover { background: var(--success); color: white; }
+        .pricing-btn.standard { background: var(--primary); color: white; }
+        .pricing-btn.standard:hover { background: #2980b9; }
+        .pricing-btn.premium { color: var(--warning); border-color: var(--warning); }
+        .pricing-btn.premium:hover { background: var(--warning); color: white; }
+
+        /* Testimonials Section */
+        .testimonial-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); height: 100%; transition: 0.3s; border-top: 4px solid var(--primary); }
+        .testimonial-card:hover { transform: translateY(-5px); }
+        .testimonial-text { font-style: italic; color: #555; margin-bottom: 20px; font-size: 0.95rem; }
+        .testimonial-author { display: flex; align-items: center; }
+        .author-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 15px; background: #ddd; }
+        .author-info h6 { margin: 0; font-weight: 700; color: #2c3e50; }
+        .author-info span { font-size: 12px; color: #7f8c8d; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-dumbbell me-2"></i>GymHub</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/"><i class="fas fa-home me-1"></i>Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#features"><i class="fas fa-star me-1"></i>Features</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#portals"><i class="fas fa-th-large me-1"></i>Portals</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact"><i class="fas fa-envelope me-1"></i>Contact</a></li>
+                    <li class="nav-item ms-2"><a class="nav-link" href="/login"><i class="fas fa-sign-in-alt me-1"></i>Login</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+        <div class="container">
+            <h1 class="hero-title">TRANSFORM YOUR FITNESS JOURNEY</h1>
+            <p class="hero-subtitle">The Complete Fitness Management Solution</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/login" class="btn btn-hero btn-hero-secondary"><i class="fas fa-sign-in-alt me-2"></i>Login to Dashboard</a>
+                <a href="/register" class="btn btn-hero btn-hero-primary" id="hero-register-cta"><i class="fas fa-user-plus me-2"></i>Create Account</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Key Features Section -->
+    <section class="container my-5 py-5" id="features">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Why Choose GymHub?</h2>
+            <p class="section-subtitle">Everything you need to manage your fitness success</p>
+        </div>
+        <div class="feature-grid">
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon primary"><i class="fas fa-chart-line"></i></div>
+                <h5 class="feature-title">Real-Time Analytics</h5>
+                <p class="feature-text">Track your progress with detailed statistics and insightful reports on your fitness journey.</p>
+            </div>
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon success"><i class="fas fa-users"></i></div>
+                <h5 class="feature-title">Expert Trainers</h5>
+                <p class="feature-text">Get personalized guidance from certified fitness professionals dedicated to your success.</p>
+            </div>
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon warning"><i class="fas fa-calendar-check"></i></div>
+                <h5 class="feature-title">Easy Scheduling</h5>
+                <p class="feature-text">Book classes and sessions effortlessly with our intuitive scheduling system.</p>
+            </div>
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon primary"><i class="fas fa-mobile-alt"></i></div>
+                <h5 class="feature-title">Mobile Ready</h5>
+                <p class="feature-text">Access your gym account anytime, anywhere on any device.</p>
+            </div>
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon success"><i class="fas fa-lock"></i></div>
+                <h5 class="feature-title">Secure & Private</h5>
+                <p class="feature-text">Your data is protected with enterprise-grade security and encryption.</p>
+            </div>
+            <div class="feature-card p-4 text-center">
+                <div class="feature-icon warning"><i class="fas fa-headset"></i></div>
+                <h5 class="feature-title">24/7 Support</h5>
+                <p class="feature-text">Our dedicated support team is always here to help you succeed.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3 stat-item mb-4">
+                    <div class="stat-number" id="stat-members" data-value="500">0</div>
+                    <div class="stat-label">Active Members</div>
+                </div>
+                <div class="col-md-3 stat-item mb-4">
+                    <div class="stat-number" id="stat-trainers" data-value="25">0</div>
+                    <div class="stat-label">Expert Trainers</div>
+                </div>
+                <div class="col-md-3 stat-item mb-4">
+                    <div class="stat-number">15+</div>
+                    <div class="stat-label">Years Experience</div>
+                </div>
+                <div class="col-md-3 stat-item mb-4">
+                    <div class="stat-number" id="stat-classes" data-value="100">0</div>
+                    <div class="stat-label">Classes Weekly</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Management Portals Section -->
+    <section class="container my-5 py-5" id="portals">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Management Portals</h2>
+            <p class="section-subtitle">Select your role to access your dedicated dashboard</p>
+        </div>
+        <div class="row g-4">
+            <!-- Admin Portal -->
+            <div class="col-lg-4">
+                <div class="portal-card p-4 text-center">
+                    <div class="portal-icon admin"><i class="fas fa-user-shield"></i></div>
+                    <h4 class="portal-title">Administrator</h4>
+                    <p class="portal-desc">Full control over members, trainers, equipment, payments, and analytics.</p>
+                    <ul class="text-muted list-unstyled small mt-3 mb-3">
+                        <li><i class="fas fa-check me-2 text-danger"></i>Manage Members</li>
+                        <li><i class="fas fa-check me-2 text-danger"></i>Process Payments</li>
+                        <li><i class="fas fa-check me-2 text-danger"></i>Track Analytics</li>
+                        <li><i class="fas fa-check me-2 text-danger"></i>System Settings</li>
+                    </ul>
+                    <a href="/admin" class="portal-btn btn-outline-danger"><i class="fas fa-arrow-right me-2"></i>Admin Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Trainer Portal -->
+            <div class="col-lg-4">
+                <div class="portal-card p-4 text-center">
+                    <div class="portal-icon trainer"><i class="fas fa-user-tie"></i></div>
+                    <h4 class="portal-title">Trainer</h4>
+                    <p class="portal-desc">Manage assigned clients, track progress, and monitor attendance records.</p>
+                    <ul class="text-muted list-unstyled small mt-3 mb-3">
+                        <li><i class="fas fa-check me-2 text-success"></i>View Clients</li>
+                        <li><i class="fas fa-check me-2 text-success"></i>Track Progress</li>
+                        <li><i class="fas fa-check me-2 text-success"></i>Schedule Sessions</li>
+                        <li><i class="fas fa-check me-2 text-success"></i>Performance Data</li>
+                    </ul>
+                    <a href="/trainers" class="portal-btn btn-outline-success"><i class="fas fa-arrow-right me-2"></i>Trainer Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Member Portal -->
+            <div class="col-lg-4">
+                <div class="portal-card p-4 text-center">
+                    <div class="portal-icon member"><i class="fas fa-user"></i></div>
+                    <h4 class="portal-title">Member</h4>
+                    <p class="portal-desc">Check membership status, track fitness progress, and book classes.</p>
+                    <ul class="text-muted list-unstyled small mt-3 mb-3">
+                        <li><i class="fas fa-check me-2 text-primary"></i>View Profile</li>
+                        <li><i class="fas fa-check me-2 text-primary"></i>Track Progress</li>
+                        <li><i class="fas fa-check me-2 text-primary"></i>Book Classes</li>
+                        <li><i class="fas fa-check me-2 text-primary"></i>Attendance History</li>
+                    </ul>
+                    <a href="/member" class="portal-btn btn-outline-primary"><i class="fas fa-arrow-right me-2"></i>Member Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Plans Section -->
+    <section class="container my-5 py-5" id="pricing">
+        <div class="text-center mb-5">
+            <h2 class="section-title">Membership Plans</h2>
+            <p class="section-subtitle">Choose the perfect plan for your fitness goals</p>
+        </div>
+        <div class="row g-4 d-flex justify-content-center">
+            <!-- Basic Plan -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card">
+                    <div class="pricing-header basic">
+                        <h4 class="pricing-title">Basic</h4>
+                        <div class="pricing-price">$29<span style="font-size: 1rem; font-weight: 400;">/mo</span></div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-list">
+                            <li><i class="fas fa-check-circle"></i>Access to Gym Equipment</li>
+                            <li><i class="fas fa-check-circle"></i>Locker Room Access</li>
+                            <li><i class="fas fa-check-circle"></i>Free WiFi</li>
+                            <li style="color: #ccc;"><i class="fas fa-times-circle" style="color: #ddd;"></i>Group Classes</li>
+                            <li style="color: #ccc;"><i class="fas fa-times-circle" style="color: #ddd;"></i>Personal Trainer</li>
+                        </ul>
+                        <a href="/register?plan=basic" class="pricing-btn basic">Select Plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Standard Plan -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card" style="transform: scale(1.05); border: 2px solid var(--primary); z-index: 2;">
+                    <div class="pricing-header standard">
+                        <div style="position: absolute; top: 0; right: 0; background: #f1c40f; color: #333; padding: 5px 15px; font-size: 12px; font-weight: 700;">POPULAR</div>
+                        <h4 class="pricing-title">Standard</h4>
+                        <div class="pricing-price">$49<span style="font-size: 1rem; font-weight: 400;">/mo</span></div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-list">
+                            <li><i class="fas fa-check-circle"></i>All Basic Features</li>
+                            <li><i class="fas fa-check-circle"></i>Unlimited Group Classes</li>
+                            <li><i class="fas fa-check-circle"></i>Sauna Access</li>
+                            <li><i class="fas fa-check-circle"></i>Nutrition Guide</li>
+                            <li style="color: #ccc;"><i class="fas fa-times-circle" style="color: #ddd;"></i>Personal Trainer</li>
+                        </ul>
+                        <a href="/register?plan=standard" class="pricing-btn standard">Select Plan</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="col-lg-4 col-md-6">
+                <div class="pricing-card">
+                    <div class="pricing-header premium">
+                        <h4 class="pricing-title">Premium</h4>
+                        <div class="pricing-price">$79<span style="font-size: 1rem; font-weight: 400;">/mo</span></div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-list">
+                            <li><i class="fas fa-check-circle"></i>All Standard Features</li>
+                            <li><i class="fas fa-check-circle"></i><strong>2x</strong> Personal Training Sessions</li>
+                            <li><i class="fas fa-check-circle"></i>Priority Support</li>
+                            <li><i class="fas fa-check-circle"></i>Monthly Progress Report</li>
+                            <li><i class="fas fa-check-circle"></i>Free Merchandise</li>
+                        </ul>
+                        <a href="/register?plan=premium" class="pricing-btn premium">Select Plan</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="container my-5 py-5" style="background-color: #f8f9fa;">
+        <div class="text-center mb-5">
+            <h2 class="section-title">What Our Members Say</h2>
+            <p class="section-subtitle">Real stories from real members</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"GymHub completely changed my fitness routine. The trainers are top-notch and the facilities are always clean and improving."</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Member" class="author-img">
+                        <div class="author-info">
+                            <h6>Sarah Johnson</h6>
+                            <span>Member since 2023</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"I love the variety of classes offered. From yoga to HIIT, there's always something challenging to do. Highly recommended!"</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Member" class="author-img">
+                        <div class="author-info">
+                            <h6>Michael Chen</h6>
+                            <span>Member since 2022</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"The management portal makes booking sessions so easy. I can track my payment history and schedule everything from my phone."</p>
+                    <div class="testimonial-author">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Member" class="author-img">
+                        <div class="author-info">
+                            <h6>Emily Davis</h6>
+                            <span>Member since 2024</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4">
+                    <h2 class="about-title">About GymHub</h2>
+                    <p class="about-text">GymHub is a comprehensive fitness management system designed to streamline gym operations and enhance member experiences. Our platform integrates member management, trainer allocation, class scheduling, and financial tracking all in one place.</p>
+                    <p class="about-text">Whether you're an administrator managing the facility, a trainer working with clients, or a member tracking your fitness journey, GymHub provides intuitive tools tailored to your needs.</p>
+                    <p class="about-text">Join thousands of satisfied gyms and members who have transformed their fitness experience with GymHub.</p>
+                </div>
+                <div class="col-lg-6">
+                    <div class="ratio ratio-16x9 rounded-3 overflow-hidden shadow">
+                        <!-- YouTube Video Embed (Loops first 47 seconds) -->
+                        <iframe class="w-100 h-100" src="https://www.youtube.com/embed/UUwmlaDT-hM?rel=0&autoplay=1&mute=1&loop=1&playlist=UUwmlaDT-hM&end=47" title="GymHub Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2 class="cta-title">Ready to Get Started?</h2>
+            <p class="cta-text">Join GymHub today and take control of your fitness journey</p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a href="/register" class="btn btn-hero btn-hero-primary" id="cta-register"><i class="fas fa-user-plus me-2"></i>Sign Up Now</a>
+                <a href="#contact" class="btn btn-outline-light btn-hero"><i class="fas fa-envelope me-2"></i>Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer-custom" id="contact">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <h6><i class="fas fa-dumbbell me-2"></i>GymHub</h6>
+                    <p class="small">Your complete fitness management solution.</p>
+                </div>
+                <div class="col-md-3">
+                    <h6>Quick Links</h6>
+                    <a href="/" class="footer-link">Home</a>
+                    <a href="#features" class="footer-link">Features</a>
+                    <a href="#portals" class="footer-link">Portals</a>
+                </div>
+                <div class="col-md-3">
+                    <h6>Contact</h6>
+                    <a href="mailto:support@gymhub.com" class="footer-link">support@gymhub.com</a>
+                    <a href="tel:+254769396080" class="footer-link">+254 769 396 080</a>
+                    <a href="#" class="footer-link">Visit Us</a>
+                </div>
+                <div class="col-md-3">
+                    <h6>Follow Us</h6>
+                    <a href="#" class="footer-link"><i class="fab fa-facebook me-2"></i>Facebook</a>
+                    <a href="#" class="footer-link"><i class="fab fa-twitter me-2"></i>Twitter</a>
+                    <a href="#" class="footer-link"><i class="fab fa-instagram me-2"></i>Instagram</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 GymHub Management System. All Rights Reserved. | <a href="#" class="text-decoration-none" style="color: var(--primary);">Privacy Policy</a> | <a href="#" class="text-decoration-none" style="color: var(--primary);">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple counter animation for stats
+        function animateCount(id, duration = 1200) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const target = parseInt(el.getAttribute('data-value')) || 0;
+            const start = 0;
+            const startTime = performance.now();
+            function step(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                el.textContent = Math.floor(progress * (target - start) + start);
+                if (progress < 1) requestAnimationFrame(step);
+                else el.textContent = target + (id === 'stat-members' || id === 'stat-trainers' || id === 'stat-classes' ? '+' : '');
+            }
+            requestAnimationFrame(step);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            animateCount('stat-members', 1400);
+            animateCount('stat-trainers', 1200);
+            animateCount('stat-classes', 1000);
+
+            // Make hero CTA more prominent on load
+            const heroCta = document.getElementById('hero-register-cta');
+            if (heroCta) heroCta.focus();
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

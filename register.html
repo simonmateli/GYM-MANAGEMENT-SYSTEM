@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GymHub | Register</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', sans-serif;
+            background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b') no-repeat center center/cover;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+        .register-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 700px;
+            padding: 50px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            padding: 12px;
+            border-radius: 12px;
+        }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.6); }
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: #0d6efd;
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+            color: #fff;
+        }
+        .form-select option { background: #1e1e2f; color: #fff; }
+        .btn-register {
+            background: linear-gradient(45deg, #0d6efd, #6610f2);
+            border: none;
+            padding: 14px;
+            font-weight: 600;
+            border-radius: 14px;
+            transition: 0.3s ease;
+        }
+        .btn-register:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(13, 110, 253, 0.4);
+        }
+        .login-link { margin-top: 15px; text-align: center; }
+        .login-link a { color: #0d6efd; text-decoration: none; }
+        .login-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+
+<body>
+
+<div class="register-card">
+
+    <div class="text-center mb-4">
+        <i class="fas fa-dumbbell fa-3x mb-3 text-primary"></i>
+        <h2>JOIN GYMHUB</h2>
+        <p class="text-light small">Start your fitness transformation today</p>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form action="{{ url_for('register') }}" method="POST" novalidate>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>First Name</label>
+                <input type="text" name="first_name" class="form-control" placeholder="John" 
+                       value="{{ request.form.first_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Last Name</label>
+                <input type="text" name="last_name" class="form-control" placeholder="Doe" 
+                       value="{{ request.form.last_name }}" required>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label>Phone</label>
+            <input type="text" name="phone" class="form-control" placeholder="07XXXXXXXX" 
+                   value="{{ request.form.phone }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Email</label>
+            <input type="email" name="email" class="form-control" placeholder="name@example.com" 
+                   value="{{ request.form.email }}" required>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Confirm Password</label>
+                <input type="password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label>Gender</label>
+                <select name="gender" class="form-select" required>
+                    <option value="" disabled {% if not request.form.gender %}selected{% endif %}>Select Gender</option>
+                    <option value="Male" {% if request.form.gender == 'Male' %}selected{% endif %}>Male</option>
+                    <option value="Female" {% if request.form.gender == 'Female' %}selected{% endif %}>Female</option>
+                    <option value="Other" {% if request.form.gender == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Date of Birth</label>
+                <input type="date" name="date_of_birth" class="form-control" 
+                       value="{{ request.form.date_of_birth }}" required>
+            </div>
+        </div>
+
+
+
+        <label>Register as:</label>
+        <select name="user_type" id="user_type" onchange="toggleFields()">
+            <option value="member">Member</option>
+            <option value="trainer">Trainer</option>
+        </select>
+
+        <!-- Trainer Specific Fields (Hidden by default) -->
+        <div id="trainer-fields" style="display:none;">
+            <label>Specialization:</label>
+            <input type="text" name="specialization" placeholder="e.g. Yoga, HIIT">
+            
+            <label>Bio Check:</label>
+            <textarea name="bio"></textarea>
+        </div>
+
+        <!-- Member Specific Fields -->
+        <div id="member-fields">
+            <!-- ... put gender, dob, plan_id here ... -->
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 btn-register">
+            CREATE ACCOUNT
+        </button>
+
+        <div class="login-link">
+            <p class="small text-light mt-3">
+                Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+            </p>
+        </div>
+
+    </form>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+function toggleFields() {
+    var type = document.getElementById("user_type").value;
+    document.getElementById("trainer-fields").style.display = (type === "trainer") ? "block" : "none";
+    document.getElementById("member-fields").style.display = (type === "member") ? "block" : "none";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GymHub | Workout Plan</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --glass-white: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #0d6efd;
+            --accent-purple: #6f42c1;
+            --accent-success: #198754;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #2d2d44 100%);
+            min-height: 100vh;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Navbar */
+        .navbar-custom {
+            background: rgba(30, 30, 47, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 1rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            color: white !important;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white !important;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Content */
+        .page-header {
+            background: var(--glass-white);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 2rem 0;
+            margin-bottom: 2rem; 
+        }
+
+        .dashboard-card {
+            background: var(--glass-white);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 25px;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        /* Tables - High Visibility (Black Font Theme) */
+        .table-custom {
+            --bs-table-color: #000000;
+            --bs-table-bg: #ffffff;
+            --bs-table-border-color: #dee2e6;
+            --bs-table-hover-color: #000000;
+            --bs-table-hover-bg: #f8f9fa;
+            
+            color: #000000 !important;
+            background-color: #ffffff !important; /* White background for black text */
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+        }
+        
+        /* Table Headers */
+        .table-custom thead th {
+            color: #000000 !important;
+            background-color: #e9ecef !important; /* Light Gray Header */
+            font-size: 1.1rem !important;
+            font-weight: 800 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #000000 !important;
+            padding: 15px !important;
+        }
+
+        /* Table Body Cells */
+        .table-custom tbody td {
+            color: #000000 !important;
+            font-size: 1.1rem !important; 
+            font-weight: 600 !important;
+            padding: 15px !important;
+            vertical-align: middle;
+            background-color: #ffffff !important; /* Force white bg */
+            border-bottom: 1px solid #dee2e6 !important;
+        }
+
+        /* Exercise Names specifically */
+        .table-custom tbody td.fw-bold {
+            font-weight: 900 !important;
+            font-size: 1.25rem !important;
+            color: #000000 !important;
+            text-shadow: none !important;
+        }
+
+        /* Hover effect */
+        .table-custom tbody tr:hover td {
+            background-color: #f1f3f5 !important;
+            color: #000000 !important;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.9em !important;
+            padding: 0.5em 0.8em !important;
+        }
+
+        /* Force override for any muted text inside tables */
+        .table-custom .text-muted, 
+        .table-custom .text-white-50 {
+            color: #212529 !important; /* Dark Gray */
+            opacity: 1 !important;
+            font-weight: 500 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-dumbbell me-2 text-primary"></i>GymHub
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item me-2"><a class="nav-link" href="{{ url_for('member_dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item me-2"><a class="nav-link active" href="{{ url_for('workout_plan') }}">Workout Plan</a></li>
+                    <li class="nav-item me-3"><a class="nav-link" href="{{ url_for('schedule') }}">Class Schedule</a></li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}" class="btn btn-sm btn-danger rounded-pill px-3 shadow-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-header text-center">
+        <div class="container">
+            <h1 class="display-5 fw-bold mb-2">My Workout Plan</h1>
+            <p class="lead text-white-50 mb-0">Your personalized weekly routine for maximum gains</p>
+            <div class="mt-4">
+                <a href="{{ url_for('schedule') }}" class="btn btn-success rounded-pill px-4 shadow">
+                   <i class="fas fa-calendar-plus me-2"></i>Book Activity
+               </a>
+           </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+
+        <!-- Weekly Schedule Timetable -->
+        <div class="row mb-5" id="weekly-overview">
+            <div class="col-12">
+                <div class="dashboard-card shadow p-0 overflow-hidden">
+                    <div class="p-4 d-flex justify-content-between align-items-center bg-dark bg-opacity-50">
+                        <h4 class="fw-bold mb-0"><i class="far fa-calendar-alt me-2 text-warning"></i>Weekly Schedule Overview</h4>
+                        <small class="text-white-50">Click a day to log your workout</small>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-dark table-bordered text-center align-middle mb-0" style="border-color: rgba(255,255,255,0.1);">
+                            <thead>
+                                <tr class="bg-dark">
+                                    <th class="py-3" style="width: 14.28%;">Monday</th>
+                                    <th class="py-3" style="width: 14.28%;">Tuesday</th>
+                                    <th class="py-3" style="width: 14.28%;">Wednesday</th>
+                                    <th class="py-3" style="width: 14.28%;">Thursday</th>
+                                    <th class="py-3" style="width: 14.28%;">Friday</th>
+                                    <th class="py-3" style="width: 14.28%;">Saturday</th>
+                                    <th class="py-3" style="width: 14.28%;">Sunday</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <!-- Monday -->
+                                    <td class="p-0">
+                                        {% if 'Lower Body' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Lower Body">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-running fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Lower Body</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Lower Body">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-primary">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-primary fs-6 mb-2">Lower Body</span>
+                                                    <i class="fas fa-running fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Tuesday -->
+                                    <td class="p-0">
+                                        {% if 'Upper Body + Core' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Upper Body + Core">
+                                            <input type="hidden" name="day_name" value="Tuesday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-dumbbell fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Upper Body</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Upper Body + Core">
+                                            <input type="hidden" name="day_name" value="Tuesday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-info">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-info text-dark fs-6 mb-2">Upper Body</span>
+                                                    <i class="fas fa-dumbbell fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Wednesday -->
+                                    <td class="p-0">
+                                        {% if 'Rest / Cardio' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Rest / Cardio">
+                                            <input type="hidden" name="day_name" value="Wednesday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-heartbeat fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Rest / Cardio</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Rest / Cardio">
+                                            <input type="hidden" name="day_name" value="Wednesday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-success">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2">Rest / Cardio</span>
+                                                    <i class="fas fa-heartbeat fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Thursday -->
+                                    <td class="p-0">
+                                        {% if 'Upper Legs' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Upper Legs">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-burn fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Upper Legs</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Upper Legs">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-danger fs-6 mb-2">Upper Legs</span>
+                                                    <i class="fas fa-burn fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Friday -->
+                                    <td class="p-0">
+                                        {% if 'Full Body' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Full Body">
+                                            <input type="hidden" name="day_name" value="Friday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-child fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Full Body</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Full Body">
+                                            <input type="hidden" name="day_name" value="Friday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-info">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-info text-dark fs-6 mb-2">Full Body</span>
+                                                    <i class="fas fa-child fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Saturday -->
+                                    <td class="p-0">
+                                        {% if 'Cardio + Abs' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Cardio + Abs">
+                                            <input type="hidden" name="day_name" value="Saturday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-lungs fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Cardio + Abs</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Cardio + Abs">
+                                            <input type="hidden" name="day_name" value="Saturday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-warning">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-warning text-dark fs-6 mb-2">Cardio + Abs</span>
+                                                    <i class="fas fa-lungs fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+
+                                    <!-- Sunday -->
+                                    <td class="p-0">
+                                        {% if 'Rest' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Rest">
+                                            <input type="hidden" name="day_name" value="Sunday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-danger" title="Click to unbook">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2"><i class="fas fa-check me-1"></i>Booked</span>
+                                                    <i class="fas fa-bed fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Rest</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST" class="h-100">
+                                            <input type="hidden" name="workout_name" value="Rest">
+                                            <input type="hidden" name="day_name" value="Sunday">
+                                            <button type="submit" class="btn btn-link text-decoration-none w-100 h-100 py-4 text-white hover-bg-success">
+                                                <div class="d-flex flex-column align-items-center">
+                                                    <span class="badge bg-success fs-6 mb-2">Rest</span>
+                                                    <i class="fas fa-bed fa-2x text-white mb-2"></i>
+                                                    <small class="text-white fw-bold d-block">Book</small>
+                                                </div>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .hover-bg-primary:hover { background-color: rgba(13, 110, 253, 0.2); }
+            .hover-bg-info:hover { background-color: rgba(13, 202, 240, 0.2); }
+            .hover-bg-success:hover { background-color: rgba(25, 135, 84, 0.2); }
+            .hover-bg-danger:hover { background-color: rgba(220, 53, 69, 0.2); }
+            .hover-bg-warning:hover { background-color: rgba(255, 193, 7, 0.2); }
+        </style>
+
+        <!-- Detailed Daily Breakdown -->
+        <h3 class="mb-4 text-white border-bottom border-dark pb-2">Detailed Monthly Schedule</h3>
+        <div class="row g-4">
+            
+            <!-- MONDAY: Lower Body -->
+            <div class="col-12" id="monday">
+                <div class="dashboard-card shadow h-100">
+                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                        <div class="rounded-circle bg-primary bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-primary mb-0">MON</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Lower Body Power</h3>
+                            <small class="text-white-50">Focus: Glutes, Hamstrings, Quads, Calves</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Lower Body">
+                                <input type="hidden" name="day_name" value="Monday">
+                                <input type="hidden" name="redirect_anchor" value="monday">
+                                <button type="submit" class="btn btn-primary rounded-pill px-4">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle">
+                            <thead>
+                                <tr class="text-white-50 small text-uppercase">
+                                    <th style="width: 40%">Exercise</th>
+                                    <th style="width: 15%">Sets</th>
+                                    <th style="width: 25%">Reps / Range</th>
+                                    <th style="width: 20%">Book</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-white">Barbell Squat</td>
+                                    <td>4</td>
+                                    <td>8–12 <span class="badge bg-secondary ms-1">Heavy</span></td>
+                                    <td>
+                                        {% if 'Barbell Squat' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Barbell Squat">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Barbell Squat">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Romanian Deadlift</td>
+                                    <td>3</td>
+                                    <td>8–10 (Control)</td>
+                                    <td>
+                                        {% if 'Romanian Deadlift' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Romanian Deadlift">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Romanian Deadlift">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Leg Press</td>
+                                    <td>3</td>
+                                    <td>10–12</td>
+                                    <td>
+                                        {% if 'Leg Press' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Press">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Press">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Walking Lunges</td>
+                                    <td>3</td>
+                                    <td>12 per leg</td>
+                                    <td>
+                                        {% if 'Walking Lunges' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Walking Lunges">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Walking Lunges">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Hip Thrust</td>
+                                    <td>3</td>
+                                    <td>10–12</td>
+                                    <td>
+                                        {% if 'Hip Thrust' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Hip Thrust">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Hip Thrust">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Calf Raises</td>
+                                    <td>4</td>
+                                    <td>15–20</td>
+                                    <td>
+                                        {% if 'Calf Raises' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Calf Raises">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Calf Raises">
+                                            <input type="hidden" name="day_name" value="Monday">
+                                            <input type="hidden" name="redirect_anchor" value="monday">
+                                            <button type="submit" class="btn btn-sm btn-outline-primary px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TUESDAY: Upper Body + Core -->
+            <div class="col-12" id="tuesday">
+                <div class="dashboard-card shadow h-100">
+                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                        <div class="rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-info mb-0">TUE</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Upper Body & Core</h3>
+                            <small class="text-white-50">Focus: Chest, back, shoulders, arms, abs</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Upper Body + Core">
+                                <input type="hidden" name="day_name" value="Tuesday">
+                                <input type="hidden" name="redirect_anchor" value="tuesday">
+                                <button type="submit" class="btn btn-info rounded-pill px-4 text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 border-end border-secondary border-opacity-25">
+                            <h5 class="fw-bold text-info mb-3">Strength</h5>
+                            <div class="table-responsive">
+                                <table class="table table-custom table-hover align-middle">
+                                    <thead>
+                                        <tr class="text-white-50 small text-uppercase">
+                                            <th>Exercise</th>
+                                            <th>Sets</th>
+                                            <th>Reps</th>
+                                            <th>Book</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-white">Bench Press</td>
+                                            <td>4</td>
+                                            <td>8–10</td>
+                                            <td>
+                                                {% if 'Bench Press' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Bench Press">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Bench Press">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-info px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Pull-Ups</td>
+                                            <td>3</td>
+                                            <td>Max Reps</td>
+                                            <td>
+                                                {% if 'Pull-Ups' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Pull-Ups">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Pull-Ups">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-info px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Shoulder Press</td>
+                                            <td>3</td>
+                                            <td>8–10</td>
+                                            <td>
+                                                {% if 'Shoulder Press' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Shoulder Press">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Shoulder Press">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-info px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Bicep Curl</td>
+                                            <td>3</td>
+                                            <td>10–12</td>
+                                            <td>
+                                                {% if 'Bicep Curl' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Bicep Curl">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Bicep Curl">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-info px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Tricep Dips</td>
+                                            <td>3</td>
+                                            <td>10–12</td>
+                                            <td>
+                                                {% if 'Tricep Dips' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Tricep Dips">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Tricep Dips">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-info px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6 ps-md-4 mt-4 mt-md-0">
+                            <h5 class="fw-bold text-warning mb-3">Core Focus</h5>
+                            <div class="table-responsive">
+                                <table class="table table-custom table-hover align-middle">
+                                    <thead>
+                                        <tr class="text-white-50 small text-uppercase">
+                                            <th>Exercise</th>
+                                            <th>Sets</th>
+                                            <th>Reps</th>
+                                            <th>Book</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-white">Plank</td>
+                                            <td>3</td>
+                                            <td>30–60 sec</td>
+                                            <td>
+                                                {% if 'Plank' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Plank">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Plank">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Crunches</td>
+                                            <td>3</td>
+                                            <td>15–20</td>
+                                            <td>
+                                                {% if 'Crunches' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Crunches">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Crunches">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-white">Leg Raises</td>
+                                            <td>3</td>
+                                            <td>12–15</td>
+                                            <td>
+                                                {% if 'Leg Raises' in logged_workouts %}
+                                                <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Leg Raises">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                                </form>
+                                                {% else %}
+                                                <form action="{{ url_for('log_workout') }}" method="POST">
+                                                    <input type="hidden" name="workout_name" value="Leg Raises">
+                                                    <input type="hidden" name="day_name" value="Tuesday">
+                                                    <input type="hidden" name="redirect_anchor" value="tuesday">
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning px-3 rounded-pill fw-bold">Book</button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WEDNESDAY: Rest / Cardio -->
+            <div class="col-12" id="wednesday">
+                <div class="dashboard-card shadow h-100 bg-secondary bg-opacity-10">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-success bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-success mb-0">WED</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Active Rest</h3>
+                            <small class="text-white-50">Light cardio, stretching, or complete rest.</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Rest / Cardio">
+                                <input type="hidden" name="day_name" value="Wednesday">
+                                <input type="hidden" name="redirect_anchor" value="wednesday">
+                                <button type="submit" class="btn btn-success rounded-pill px-4 text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Active Rest
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-dark bg-opacity-50 rounded text-center">
+                        <p class="mb-0 text-white-50"><i class="fas fa-walking me-2"></i>Go for a 30-min walk, do yoga, or simply relax to let your muscles recover.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- THURSDAY: Upper Legs -->
+            <div class="col-12" id="thursday">
+                <div class="dashboard-card shadow h-100">
+                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                        <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-danger mb-0">THU</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Upper Legs Focus</h3>
+                            <small class="text-white-50">Focus: Quads & Hamstrings Isolation</small>
+                        </div>
+                         <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Upper Legs">
+                                <input type="hidden" name="day_name" value="Thursday">
+                                <input type="hidden" name="redirect_anchor" value="thursday">
+                                <button type="submit" class="btn btn-danger rounded-pill px-4 text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover align-middle">
+                            <thead>
+                                <tr class="text-white-50 small text-uppercase">
+                                    <th style="width: 40%">Exercise</th>
+                                    <th style="width: 15%">Sets</th>
+                                    <th style="width: 25%">Reps / Range</th>
+                                    <th style="width: 20%">Book</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-bold text-white">Leg Extension</td>
+                                    <td>3</td>
+                                    <td>12–15</td>
+                                    <td>
+                                        {% if 'Leg Extension' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Extension">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Extension">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Leg Curl</td>
+                                    <td>3</td>
+                                    <td>12–15</td>
+                                    <td>
+                                        {% if 'Leg Curl' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Curl">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Leg Curl">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Bulgarian Split Squat</td>
+                                    <td>3</td>
+                                    <td>8–10 per leg</td>
+                                    <td>
+                                        {% if 'Bulgarian Split Squat' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Bulgarian Split Squat">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Bulgarian Split Squat">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Hack Squat</td>
+                                    <td>3</td>
+                                    <td>10</td>
+                                    <td>
+                                        {% if 'Hack Squat' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Hack Squat">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Hack Squat">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold text-white">Step-Ups</td>
+                                    <td>3</td>
+                                    <td>10 per leg</td>
+                                    <td>
+                                        {% if 'Step-Ups' in logged_workouts %}
+                                        <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Step-Ups">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                        </form>
+                                        {% else %}
+                                        <form action="{{ url_for('log_workout') }}" method="POST">
+                                            <input type="hidden" name="workout_name" value="Step-Ups">
+                                            <input type="hidden" name="day_name" value="Thursday">
+                                            <input type="hidden" name="redirect_anchor" value="thursday">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill fw-bold">Book</button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- FRIDAY: Full Body -->
+            <div class="col-12" id="friday">
+                 <div class="dashboard-card shadow h-100">
+                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                        <div class="rounded-circle bg-info bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-info mb-0">FRI</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Full Body Compound</h3>
+                            <small class="text-white-50">Focus: All major muscle groups</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Full Body">
+                                <input type="hidden" name="day_name" value="Friday">
+                                <input type="hidden" name="redirect_anchor" value="friday">
+                                <button type="submit" class="btn btn-info rounded-pill px-4 text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-dark bg-opacity-50 rounded text-center">
+                        <p class="mb-0 text-white-50">Perform compound movements targeting all muscle groups. (Barbell Squats, Bench Press, Deadlift, Overhead Press)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SATURDAY: Cardio + Abs -->
+            <div class="col-12" id="saturday">
+                 <div class="dashboard-card shadow h-100">
+                    <div class="d-flex align-items-center mb-4 border-bottom border-secondary border-opacity-25 pb-3">
+                        <div class="rounded-circle bg-warning bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-warning mb-0">SAT</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Cardio & Abs</h3>
+                            <small class="text-white-50">Focus: Endurance and Core</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Cardio + Abs">
+                                <input type="hidden" name="day_name" value="Saturday">
+                                <input type="hidden" name="redirect_anchor" value="saturday">
+                                <button type="submit" class="btn btn-warning rounded-pill px-4 text-dark">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Session
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                     <div class="table-responsive">
+                         <table class="table table-custom table-hover align-middle">
+                             <thead>
+                                 <tr class="text-white-50 small text-uppercase">
+                                     <th>Exercise</th>
+                                     <th>Duration/Sets</th>
+                                     <th>Activity</th>
+                                     <th>Book</th>
+                                 </tr>
+                             </thead>
+                             <tbody>
+                                 <tr>
+                                     <td class="text-white fw-bold">HIIT / Cardio</td>
+                                     <td>20-30 mins</td>
+                                     <td>Running, Cycling, or Jump Rope</td>
+                                     <td>
+                                         {% if 'HIIT / Cardio' in logged_workouts %}
+                                         <form action="{{ url_for('unbook_workout') }}" method="POST">
+                                             <input type="hidden" name="workout_name" value="HIIT / Cardio">
+                                             <input type="hidden" name="day_name" value="Saturday">
+                                             <input type="hidden" name="redirect_anchor" value="saturday">
+                                             <button type="submit" class="btn btn-sm btn-danger rounded-circle"><i class="fas fa-times"></i></button>
+                                         </form>
+                                         {% else %}
+                                         <form action="{{ url_for('log_workout') }}" method="POST">
+                                             <input type="hidden" name="workout_name" value="HIIT / Cardio">
+                                             <input type="hidden" name="day_name" value="Saturday">
+                                             <input type="hidden" name="redirect_anchor" value="saturday">
+                                             <button type="submit" class="btn btn-sm btn-outline-warning px-3 rounded-pill fw-bold">Book</button>
+                                         </form>
+                                         {% endif %}
+                                     </td>
+                                 </tr>
+                             </tbody>
+                         </table>
+                     </div>
+                </div>
+            </div>
+
+            <!-- SUNDAY: Rest -->
+            <div class="col-12" id="sunday">
+                <div class="dashboard-card shadow h-100 bg-secondary bg-opacity-10">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="rounded-circle bg-success bg-opacity-25 d-flex align-items-center justify-content-center me-3" style="width: 60px; height: 60px;">
+                            <span class="h5 fw-bold text-success mb-0">SUN</span>
+                        </div>
+                        <div>
+                            <h3 class="fw-bold mb-0 text-white">Complete Rest</h3>
+                            <small class="text-white-50">Recovery day.</small>
+                        </div>
+                        <div class="ms-auto">
+                            <form action="{{ url_for('log_workout') }}" method="POST">
+                                <input type="hidden" name="workout_name" value="Rest">
+                                <input type="hidden" name="day_name" value="Sunday">
+                                <input type="hidden" name="redirect_anchor" value="sunday">
+                                <button type="submit" class="btn btn-success rounded-pill px-4 text-white">
+                                    <i class="fas fa-calendar-check me-2"></i>Book Rest
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                     <div class="p-3 bg-dark bg-opacity-50 rounded text-center">
+                        <p class="mb-0 text-white-50"><i class="fas fa-bed me-2"></i>Take a full day off to let your body repair itself. Drink plenty of water.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
