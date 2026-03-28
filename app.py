@@ -656,8 +656,8 @@ def member_dashboard():
         finally:
             close_db_connection(conn)
 
-
-    # 10. Pass variables to the template
+ 
+    # 10. Pass variables to the template 
     return render_template("member.html", 
                            member=member,
                            plans=plans,

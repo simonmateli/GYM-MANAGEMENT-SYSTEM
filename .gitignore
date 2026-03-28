@@ -1,44 +1,6 @@
-# Dependencies
-node_modules/
-venv/
-env/
-__pycache__/
+_pycache_/
 *.pyc
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Build outputs
-dist/
-build/
-*.egg-info/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-
-# Frontend specific
-.next/
-.nuxt/
-coverage/
-
-# Backend specific
-*.sqlite
+venv/
+instance/
 *.db
-
-# Temporary files
-tmp/
-temp/
+.env
