@@ -1,5 +1,10 @@
 import sqlite3
 import os
+
+print("CURRENT FILES:", os.listdir())
+print("TEMPLATES EXISTS:", os.path.exists("templates"))
+if os.path.exists("templates"):
+    print("TEMPLATES CONTENT:", os.listdir("templates"))
 import csv
 import io
 from flask import Flask, render_template, request, redirect, url_for, session, make_response, flash, jsonify
