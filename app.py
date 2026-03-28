@@ -48,7 +48,7 @@ from database import (
 # Ensure we are working in the correct directory (BACKEND)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-app = Flask(__name__, template_folder="../FRONTEND", static_folder="../STATIC")
+app = Flask(__name__, template_folder="../templates", static_folder="../STATIC")
 app.secret_key = "change-me-now"
 
 # Ensure DB/tables exist on startup
